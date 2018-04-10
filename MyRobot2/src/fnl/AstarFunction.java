@@ -7,7 +7,6 @@ import searchpractice.Constants;
 import searchpractice.Coordinates;
 
 public class AstarFunction {
-	private double[][] heuristicFunction = new double[Constants.NUMBER_ROWS + 1][Constants.NUMBER_COLUMNS + 1];
 	private Node FinishNode = new Node();
 	private Node InitialNode = new Node();
 	private int step = 64;
@@ -30,6 +29,7 @@ public class AstarFunction {
 				Node node = new Node();
 				node.setCoordinates(newCoordinates);
 				node.setObsatcle(true);
+				nodes.add(node);
 			} else {
 				NdxObstacle--;
 				continue;
@@ -76,6 +76,10 @@ public class AstarFunction {
 
 			}
 		}
+		for(Node n: nodes){
+			System.out.println(n.toString());
+		}
+		System.out.println(nodes.size());
 	}
 
 	public Node getNodeWithLowestF() {
@@ -93,45 +97,43 @@ public class AstarFunction {
 	public List<Coordinates> astarAlgorithm() {
 		generatedHeuristicFunction();
 		openset.add(InitialNode);
-
-		ActualNode = getNodeWithLowestF();
-		if (ActualNode.isFinish()) {
-			reconstructPath();
-			return moves;
-		}
-		openset.remove(ActualNode);
-		closedSet.add(ActualNode);
-		Set<Node> neighbours = new HashSet<>();
-		neighbours.add(getNode(new Coordinates(ActualNode.getCoordinates().getxCoordinate() - 64,
-				ActualNode.getCoordinates().getyCoordinate())));
-		neighbours.add(getNode(new Coordinates(ActualNode.getCoordinates().getxCoordinate() + 64,
-				ActualNode.getCoordinates().getyCoordinate())));
-		neighbours.add(getNode(new Coordinates(ActualNode.getCoordinates().getxCoordinate(),
-				ActualNode.getCoordinates().getyCoordinate() - 64)));
-		neighbours.add(getNode(new Coordinates(ActualNode.getCoordinates().getxCoordinate(),
-				ActualNode.getCoordinates().getyCoordinate() + 64)));
-
-		for (Node neighbour : neighbours) {
-			if (closedSet.contains(neighbour)) {
-				continue;
+		while (!openset.isEmpty()) {
+			ActualNode = getNodeWithLowestF();
+			if (ActualNode.isFinish()) {
+				reconstructPath();
+				return moves;
 			}
+			openset.remove(ActualNode);
+			closedSet.add(ActualNode);
+			Set<Node> neighbours = new HashSet<>();
+			neighbours.add(getNode(new Coordinates(ActualNode.getCoordinates().getxCoordinate() - 64,
+					ActualNode.getCoordinates().getyCoordinate())));
+			neighbours.add(getNode(new Coordinates(ActualNode.getCoordinates().getxCoordinate() + 64,
+					ActualNode.getCoordinates().getyCoordinate())));
+			neighbours.add(getNode(new Coordinates(ActualNode.getCoordinates().getxCoordinate(),
+					ActualNode.getCoordinates().getyCoordinate() - 64)));
+			neighbours.add(getNode(new Coordinates(ActualNode.getCoordinates().getxCoordinate(),
+					ActualNode.getCoordinates().getyCoordinate() + 64)));
 
-			if (neighbour.isObsatcle()) {
-				continue;
-			}
-			double tentiveG = ActualNode.getG() + Constants.DISTANCE_NEIGHBOUR_CURRENT;
-			if ((!openset.contains(neighbour)) || (tentiveG < neighbour.getG())) {
-				neighbour.setParent(ActualNode);
-				neighbour.setG(tentiveG);
-				neighbour.setF(neighbour.getG() + neighbour.getH());
-				if (!openset.contains(neighbour)) {
-					openset.add(neighbour);
+			for (Node neighbour : neighbours) {
+				if ((neighbour == null) || (closedSet.contains(neighbour)) || (neighbour.isObsatcle())) {
+					continue;
 				}
 
+				double tentiveG = ActualNode.getG() + Constants.DISTANCE_NEIGHBOUR_CURRENT;
+				if ((!openset.contains(neighbour)) || (tentiveG < neighbour.getG())) {
+					neighbour.setParent(ActualNode);
+					neighbour.setG(tentiveG);
+					neighbour.setF(neighbour.getG() + neighbour.getH());
+					if (!openset.contains(neighbour)) {
+						openset.add(neighbour);
+					}
+
+				}
 			}
 		}
 
-		return null;
+		return moves;
 	}
 
 	private List<Coordinates> reconstructPath() {
@@ -150,8 +152,8 @@ public class AstarFunction {
 	public static void main(String[] args) {
 		AstarFunction a = new AstarFunction();
 		List<Coordinates> list = a.astarAlgorithm();
-		for (Coordinates c : list) {
-			System.out.println(c.toString() + " \n");
+		for (int i = 0; i < list.size(); i++) {
+			System.out.println(list.get(i).toString() + "\n");
 		}
 	}
 }

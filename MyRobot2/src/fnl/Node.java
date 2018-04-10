@@ -75,5 +75,10 @@ public class Node {
 	public void setFinish(boolean isFinish) {
 		this.isFinish = isFinish;
 	}
+	@Override
+	public String toString() {
+
+		return coordinates.getxCoordinate() + " " + coordinates.getyCoordinate() + " |\n";
+	}
 
 }
