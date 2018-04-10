@@ -8,24 +8,15 @@ import searchpractice.Coordinates;
 
 public class AstarFunction {
 	private double[][] heuristicFunction = new double[Constants.NUMBER_ROWS + 1][Constants.NUMBER_COLUMNS + 1];
-	// private double[] xCoordinates = new double[Constants.NUMBER_OBSTACLES +
-	// 1];
-	/*
-	 * private double[] yCoordinates = new double[Constants.NUMBER_OBSTACLES +
-	 * 1];
-	 */
-	private double xCoordinateOfFinish;
-	private double yCoordinateOfFinish;
-	private double xCoordinateOfStart;
-	private double yCoordinateOfStart;
+	private Node FinishNode = new Node();
+	private Node InitialNode = new Node();
 	private int step = 64;
-	private double xActual;
-	private double yActual;
-	private List<String> moves;
+	private Node ActualNode = new Node();
+	private List<Coordinates> moves = new ArrayList<>();
 	private Set<Coordinates> obstacles = new HashSet<Coordinates>();
-	private Set<Node> nodes= new HashSet<>();
-	private Set<Node> openset= new HashSet<>();
-	private Set<Node> closedSet= new HashSet<>();
+	private Set<Node> nodes = new HashSet<>();
+	private Set<Node> openset = new HashSet<>();
+	private Set<Node> closedSet = new HashSet<>();
 
 	public AstarFunction() {
 		Random r = new Random(Constants.seed);
@@ -36,64 +27,131 @@ public class AstarFunction {
 			Coordinates newCoordinates = new Coordinates(InitialObstacleRow, InitialObstacleCol);
 			if (!obstacles.contains(newCoordinates)) {
 				obstacles.add(newCoordinates);
+				Node node = new Node();
+				node.setCoordinates(newCoordinates);
+				node.setObsatcle(true);
 			} else {
 				NdxObstacle--;
 				continue;
 			}
 
 		}
-		xCoordinateOfStart = (double) (r.nextInt(Constants.NUMBER_ROWS + 1)) * Constants.SIZE_OF_TILES + 32;
-		yCoordinateOfStart = (double) (r.nextInt(Constants.NUMBER_COLUMNS + 1)) * Constants.SIZE_OF_TILES + 32;
-		xActual = xCoordinateOfStart;
-		yActual = yCoordinateOfStart;
-		xCoordinateOfFinish = (double) 10 * Constants.SIZE_OF_TILES + 32;
-		yCoordinateOfFinish = (double) 5 * Constants.SIZE_OF_TILES + 32;
 
+		double xCoordinateOfStart = (double) (r.nextInt(Constants.NUMBER_ROWS + 1)) * Constants.SIZE_OF_TILES + 32;
+		double yCoordinateOfStart = (double) (r.nextInt(Constants.NUMBER_COLUMNS + 1)) * Constants.SIZE_OF_TILES + 32;
+		InitialNode.setInitial(true);
+		InitialNode.setCoordinates(new Coordinates(xCoordinateOfStart, yCoordinateOfStart));
+		nodes.add(InitialNode);
+		ActualNode = InitialNode;
+		double xCoordinateOfFinish = (double) 10 * Constants.SIZE_OF_TILES + 32;
+		double yCoordinateOfFinish = (double) 5 * Constants.SIZE_OF_TILES + 32;
+		FinishNode.setFinish(true);
+		FinishNode.setCoordinates(new Coordinates(xCoordinateOfFinish, yCoordinateOfFinish));
+		nodes.add(FinishNode);
+	}
+
+	public Node getNode(Coordinates coordninates) {
+		for (Node n : nodes) {
+			if (n.getCoordinates().equals(coordninates))
+				return n;
+		}
+		return null;
 	}
 
 	public void generatedHeuristicFunction() {
 		for (int i = 0; i <= Constants.NUMBER_ROWS; i++) {
 			for (int j = 0; j <= Constants.NUMBER_COLUMNS; j++) {
-				double h = Math.sqrt((Math.pow((i * 64 + 32 - xCoordinateOfFinish), 2))
-						+ (Math.pow((j * 64 + 32 - yCoordinateOfFinish), 2)));
-				Node node= new Node();
-				node.setH(h);
-				node.setCoordinates(new Coordinates((double) i*step+32, (double)j*step+32));
-
-			}
-		}
-	}
-
-	public void multiplyF(double h) {
-		double g = ((xActual - 32) / step) + 1;
-		double f = g + h;
-
-	}
-
-	public List<String> astarAlgorithm() {
-		Map<Coordinates, Map<Coordinates, Double>> table = new HashMap<>();
-		Coordinates up;
-		Coordinates down;
-		Coordinates left;
-		Coordinates right;
-		while ((xActual != xCoordinateOfFinish) && (yActual != yCoordinateOfFinish)) {
-			if (!table.containsKey(new Coordinates(xActual, yActual))) {
-				Map<Coordinates, Double> sucessor = new HashMap<>();
-				up = new Coordinates(xActual, yActual + 64);
-				down = new Coordinates(xActual, yActual - 64);
-				right = new Coordinates(xActual + 64, yActual);
-				left = new Coordinates(xActual - 64, yActual);
-				if (!obstacles.contains(up)) {
-					if (!table.containsKey(up)) {
-						if (up.getyCoordinate() < Constants.BATTLEFIELD_HEIGH) {
-							double  h=heuristicFunction[(int)((up.getxCoordinate()-32)/step)][(int)((up.getyCoordinate()-32)/step)];
-							
-
-						}
-					}
+				double h = Math.sqrt((Math.pow((i * step + 32 - FinishNode.getCoordinates().getxCoordinate()), 2))
+						+ (Math.pow((j * step + 32 - FinishNode.getCoordinates().getyCoordinate()), 2)));
+				Coordinates coorinates = new Coordinates((double) i * step + 32, (double) j * step + 32);
+				Node node = getNode(coorinates);
+				if (node != null) {
+					node.setH(h);
+				} else {
+					node = new Node();
+					node.setH(h);
+					node.setCoordinates(coorinates);
+					nodes.add(node);
 				}
+
 			}
 		}
+	}
+
+	public Node getNodeWithLowestF() {
+		double minF = Double.MAX_VALUE;
+		Node minNode = new Node();
+		for (Node n : openset) {
+			if (n.getF() < minF) {
+				minNode = n;
+				minF = n.getF();
+			}
+		}
+		return minNode;
+	}
+
+	public List<Coordinates> astarAlgorithm() {
+		generatedHeuristicFunction();
+		openset.add(InitialNode);
+
+		ActualNode = getNodeWithLowestF();
+		if (ActualNode.isFinish()) {
+			reconstructPath();
+			return moves;
+		}
+		openset.remove(ActualNode);
+		closedSet.add(ActualNode);
+		Set<Node> neighbours = new HashSet<>();
+		neighbours.add(getNode(new Coordinates(ActualNode.getCoordinates().getxCoordinate() - 64,
+				ActualNode.getCoordinates().getyCoordinate())));
+		neighbours.add(getNode(new Coordinates(ActualNode.getCoordinates().getxCoordinate() + 64,
+				ActualNode.getCoordinates().getyCoordinate())));
+		neighbours.add(getNode(new Coordinates(ActualNode.getCoordinates().getxCoordinate(),
+				ActualNode.getCoordinates().getyCoordinate() - 64)));
+		neighbours.add(getNode(new Coordinates(ActualNode.getCoordinates().getxCoordinate(),
+				ActualNode.getCoordinates().getyCoordinate() + 64)));
+
+		for (Node neighbour : neighbours) {
+			if (closedSet.contains(neighbour)) {
+				continue;
+			}
+
+			if (neighbour.isObsatcle()) {
+				continue;
+			}
+			double tentiveG = ActualNode.getG() + Constants.DISTANCE_NEIGHBOUR_CURRENT;
+			if ((!openset.contains(neighbour)) || (tentiveG < neighbour.getG())) {
+				neighbour.setParent(ActualNode);
+				neighbour.setG(tentiveG);
+				neighbour.setF(neighbour.getG() + neighbour.getH());
+				if (!openset.contains(neighbour)) {
+					openset.add(neighbour);
+				}
+
+			}
+		}
+
 		return null;
+	}
+
+	private List<Coordinates> reconstructPath() {
+		List<Coordinates> help = new ArrayList<>();
+		Node cursor = ActualNode;
+		while (cursor.getParent() != null) {
+			help.add(cursor.getCoordinates());
+			cursor = cursor.getParent();
+		}
+		for (int i = help.size() - 1; i >= 0; i--)
+			moves.add(help.get(i));
+
+		return null;
+	}
+
+	public static void main(String[] args) {
+		AstarFunction a = new AstarFunction();
+		List<Coordinates> list = a.astarAlgorithm();
+		for (Coordinates c : list) {
+			System.out.println(c.toString() + " \n");
+		}
 	}
 }
