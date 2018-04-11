@@ -30,30 +30,38 @@ public class AstarFunction {
 				node.setCoordinates(newCoordinates);
 				node.setObsatcle(true);
 				nodes.add(node);
+
 			} else {
 				NdxObstacle--;
 				continue;
 			}
 
 		}
-
+		for (Coordinates ob : obstacles) {
+			System.out.println(ob.toString());
+		}
 		double xCoordinateOfStart = (double) (r.nextInt(Constants.NUMBER_ROWS + 1)) * Constants.SIZE_OF_TILES + 32;
 		double yCoordinateOfStart = (double) (r.nextInt(Constants.NUMBER_COLUMNS + 1)) * Constants.SIZE_OF_TILES + 32;
 		InitialNode.setInitial(true);
 		InitialNode.setCoordinates(new Coordinates(xCoordinateOfStart, yCoordinateOfStart));
 		nodes.add(InitialNode);
+		System.out.println(InitialNode.getCoordinates().toString());
 		ActualNode = InitialNode;
-		double xCoordinateOfFinish = (double) 10 * Constants.SIZE_OF_TILES + 32;
-		double yCoordinateOfFinish = (double) 5 * Constants.SIZE_OF_TILES + 32;
+		double xCoordinateOfFinish = (double) (r.nextInt(Constants.NUMBER_ROWS + 1)) * Constants.SIZE_OF_TILES + 32;
+		double yCoordinateOfFinish = (double) (r.nextInt(Constants.NUMBER_COLUMNS + 1)) * Constants.SIZE_OF_TILES + 32;
 		FinishNode.setFinish(true);
 		FinishNode.setCoordinates(new Coordinates(xCoordinateOfFinish, yCoordinateOfFinish));
 		nodes.add(FinishNode);
+		System.out.println(FinishNode.getCoordinates().toString());
 	}
 
 	public Node getNode(Coordinates coordninates) {
 		for (Node n : nodes) {
-			if (n.getCoordinates().equals(coordninates))
+			if ((n.getCoordinates().getxCoordinate() == coordninates.getxCoordinate())
+					&& (n.getCoordinates().getyCoordinate() == coordninates.getyCoordinate())) {
 				return n;
+
+			}
 		}
 		return null;
 	}
@@ -67,6 +75,9 @@ public class AstarFunction {
 				Node node = getNode(coorinates);
 				if (node != null) {
 					node.setH(h);
+					if (node.isInitial()) {
+						node.setF(node.getG() + h);
+					}
 				} else {
 					node = new Node();
 					node.setH(h);
@@ -76,9 +87,7 @@ public class AstarFunction {
 
 			}
 		}
-		for(Node n: nodes){
-			System.out.println(n.toString());
-		}
+
 		System.out.println(nodes.size());
 	}
 
@@ -101,7 +110,9 @@ public class AstarFunction {
 			ActualNode = getNodeWithLowestF();
 			if (ActualNode.isFinish()) {
 				reconstructPath();
+				System.out.println(moves.size());
 				return moves;
+
 			}
 			openset.remove(ActualNode);
 			closedSet.add(ActualNode);
@@ -133,7 +144,7 @@ public class AstarFunction {
 			}
 		}
 
-		return moves;
+		return null;
 	}
 
 	private List<Coordinates> reconstructPath() {
@@ -143,6 +154,8 @@ public class AstarFunction {
 			help.add(cursor.getCoordinates());
 			cursor = cursor.getParent();
 		}
+		help.add(cursor.getCoordinates());
+
 		for (int i = help.size() - 1; i >= 0; i--)
 			moves.add(help.get(i));
 
@@ -152,8 +165,9 @@ public class AstarFunction {
 	public static void main(String[] args) {
 		AstarFunction a = new AstarFunction();
 		List<Coordinates> list = a.astarAlgorithm();
+		System.out.println("Cesta");
 		for (int i = 0; i < list.size(); i++) {
-			System.out.println(list.get(i).toString() + "\n");
+			System.out.println(list.get(i).toString());
 		}
 	}
 }

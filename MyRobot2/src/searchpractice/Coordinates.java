@@ -2,29 +2,34 @@ package searchpractice;
 
 public class Coordinates {
 
-	Double xCoordinate;
-	Double yCoordinate;
+	double xCoordinate;
+	double yCoordinate;
 
-	public Coordinates(Double xCoordinate, Double yCoordinate) {
+	public Coordinates(double xCoordinate, double yCoordinate) {
 		super();
 		this.xCoordinate = xCoordinate;
 		this.yCoordinate = yCoordinate;
 	}
 
-	public Double getxCoordinate() {
+	public double getxCoordinate() {
 		return xCoordinate;
 	}
 
-	public void setxCoordinate(Double xCoordinate) {
+	public void setxCoordinate(double xCoordinate) {
 		this.xCoordinate = xCoordinate;
 	}
 
-	public Double getyCoordinate() {
+	public double getyCoordinate() {
 		return yCoordinate;
 	}
 
-	public void setyCoordinate(Double yCoordinate) {
+	public void setyCoordinate(double yCoordinate) {
 		this.yCoordinate = yCoordinate;
 	}
 
+	@Override
+	public String toString() {
+
+		return xCoordinate + " " + yCoordinate + " \n";
+	}
 }
