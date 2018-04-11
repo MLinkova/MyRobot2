@@ -1,20 +1,8 @@
 package fnl;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
-
-import robocode.AdvancedRobot;
 import robocode.Robot;
-import robocode.RobotStatus;
-import robocode.ScannedRobotEvent;
-import robocode.StatusEvent;
-import robocode.control.RobotSetup;
-import robocode.control.RobotSpecification;
-import robocode.util.Utils;
-import searchpractice.Constants;
 import searchpractice.Coordinates;
 
 public class FnlBot extends Robot {
@@ -22,26 +10,31 @@ public class FnlBot extends Robot {
 	private int distance = 64;
 
 	public FnlBot() {
-		AstarFunction af = new AstarFunction();
+		// run A * algorithm and get the best coordinates
+		Astar af = new Astar();
 		moves = af.astarAlgorithm();
 	}
 
 	public void run() {
-
+		// move according coordinates for A * algorithm
 		for (int i = 0; i < moves.size(); i++) {
+			// if the best way is in left
 			if (getX() < moves.get(i).getxCoordinate()) {
 				turnRight(90);
 				ahead(distance);
 				turnLeft(90);
+				// if the best way is in right
 			} else if (getX() > moves.get(i).getxCoordinate()) {
 				turnLeft(90);
 				ahead(distance);
 				turnRight(90);
 			}
+			// if the best way is down
 			if (getY() > moves.get(i).getyCoordinate()) {
 				back(distance);
 
 			} else if ((getY() < moves.get(i).getyCoordinate())) {
+				// if the best way is up
 				ahead(distance);
 
 			}

@@ -9,4 +9,5 @@ public class Constants {
 	public static final double BATTLEFIELD_HEIGH = 832;
 	public static final int seed = 5;
 	public static final int DISTANCE_NEIGHBOUR_CURRENT = 1;
+	public static final int HALF_TILE = 32;
 }

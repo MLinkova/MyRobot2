@@ -2,9 +2,11 @@ package fnl;
 
 import searchpractice.Coordinates;
 
-public class Node {
+public class Tile {
+	// class contains information of one tile, This information are important
+	// for A * algorithm
 	private Coordinates coordinates;
-	private Node parent = null;
+	private Tile parent = null;
 	private double g = 1;
 	private double h = 1;
 	private double f = 1;
@@ -20,11 +22,11 @@ public class Node {
 		this.coordinates = coordinates;
 	}
 
-	public Node getParent() {
+	public Tile getParent() {
 		return parent;
 	}
 
-	public void setParent(Node parent) {
+	public void setParent(Tile parent) {
 		this.parent = parent;
 	}
 
@@ -75,9 +77,9 @@ public class Node {
 	public void setFinish(boolean isFinish) {
 		this.isFinish = isFinish;
 	}
+
 	@Override
 	public String toString() {
-
 		return coordinates.getxCoordinate() + " " + coordinates.getyCoordinate() + " |\n";
 	}
 
